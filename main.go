@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os/exec"
 	"time"
@@ -13,19 +12,13 @@ func registerRoutes() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		dir := "/home/pi/code/maxtaylordavi.es"
 
-		cmds := []*exec.Cmd{
-			exec.Command("git", "pull"),
-			exec.Command("go", "build"),
-			exec.Command("systemctl", "restart", "maxtaylordavi.es.service"),
-		}
+		cmd := exec.Command("/bin/sh", "-c", "git pull && go build && sudo systemctl restart maxtaylordavi.es.service")
+		cmd.Dir = dir
 
-		for _, cmd := range cmds {
-			cmd.Dir = dir
-			err := cmd.Run()
-			if err != nil {
-				http.Error(w, fmt.Sprintf("%s stage failed with error '%s'", cmd.Path, err.Error()), http.StatusInternalServerError)
-				return
-			}
+		err := cmd.Run()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 	})
 
