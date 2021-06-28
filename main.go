@@ -12,14 +12,19 @@ func registerRoutes() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		dir := "/home/pi/code/maxtaylordavi.es"
 
-		cmd := exec.Command("git", "pull")
-		cmd.Dir = dir
+		cmds := []*exec.Cmd{
+			exec.Command("git", "pull"),
+			exec.Command("go", "build"),
+			exec.Command("systemctl", "restart", "maxtaylordavi.es.service"),
+		}
 
-		err := cmd.Run()
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		for _, cmd := range cmds {
+			cmd.Dir = dir
+			err := cmd.Run()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	})
 
