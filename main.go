@@ -28,7 +28,7 @@ func registerRoutes() http.Handler {
 
 func main() {
 	server := http.Server{
-		Addr:         ":8000",
+		Addr:         ":9000",
 		Handler:      registerRoutes(),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
