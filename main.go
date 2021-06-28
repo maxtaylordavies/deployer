@@ -10,8 +10,12 @@ func registerRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		cmd := exec.Command("git pull && go build && sudo systemctl restart maxtaylordavi.es.service")
-		_, err := cmd.Output()
+		dir := "/home/pi/code/maxtaylordavi.es"
+
+		cmd := exec.Command("git", "pull")
+		cmd.Dir = dir
+
+		err := cmd.Run()
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
