@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os/exec"
 	"time"
@@ -22,7 +23,7 @@ func registerRoutes() http.Handler {
 			cmd.Dir = dir
 			err := cmd.Run()
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, fmt.Sprintf("%s stage failed with error '%s'", cmd.Path, err.Error()), http.StatusInternalServerError)
 				return
 			}
 		}
