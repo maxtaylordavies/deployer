@@ -17,16 +17,15 @@ func registerRoutes() http.Handler {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-
 		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", repo))
 		cmd.Dir = "/home/pi/code/" + repo
 
-		out, err := cmd.Output()
-		if err != nil {
-			http.Error(w, "output: "+string(out)+", error: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
+		go cmd.Output()
+		w.WriteHeader(http.StatusOK)
+		// if err != nil {
+		// 	http.Error(w, "output: "+string(out)+", error: "+err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
 	})
 
 	return mux
