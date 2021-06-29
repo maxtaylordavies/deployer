@@ -10,7 +10,7 @@ import (
 func registerRoutes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/reload", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/deploy", func(w http.ResponseWriter, r *http.Request) {
 		repo := r.URL.Query().Get("repo")
 		if repo == "" {
 			http.Error(w, "repo query param is required", http.StatusBadRequest)
