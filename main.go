@@ -10,13 +10,15 @@ import (
 func registerRoutes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.URL)
+	mux.HandleFunc("/reload", func(w http.ResponseWriter, r *http.Request) {
+		repo := r.URL.Query().Get("repo")
+		if repo == "" {
+			http.Error(w, "repo query param is required", http.StatusBadRequest)
+			return
+		}
 
-		dir := "/home/pi/code/maxtaylordavi.es"
-
-		cmd := exec.Command("/bin/sh", "-c", "git pull && go build && sudo systemctl restart maxtaylordavi.es.service")
-		cmd.Dir = dir
+		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && go build && sudo systemctl restart %s.service", repo))
+		cmd.Dir = "/home/pi/code/" + repo
 
 		out, err := cmd.Output()
 		if err != nil {
