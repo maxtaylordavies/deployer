@@ -18,9 +18,9 @@ func registerRoutes() http.Handler {
 		cmd := exec.Command("/bin/sh", "-c", "git pull && go build && sudo systemctl restart maxtaylordavi.es.service")
 		cmd.Dir = dir
 
-		err := cmd.Run()
+		out, err := cmd.Output()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "output: "+string(out)+", error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
