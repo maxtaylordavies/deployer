@@ -17,6 +17,8 @@ func registerRoutes() http.Handler {
 			return
 		}
 
+		w.WriteHeader(http.StatusOK)
+
 		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", repo))
 		cmd.Dir = "/home/pi/code/" + repo
 
