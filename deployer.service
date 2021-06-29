@@ -2,6 +2,7 @@
 Description=deployer
 
 [Service]
+User=pi
 Type=simple
 Restart=always
 RestartSec=5s
