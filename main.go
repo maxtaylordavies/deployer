@@ -36,7 +36,7 @@ func main() {
 		Handler:      registerRoutes(),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		IdleTimeout:  600 * time.Second,
 	}
 
 	server.ListenAndServe()
