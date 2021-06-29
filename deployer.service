@@ -1,0 +1,12 @@
+[Unit]
+Description=deployer
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/home/pi/code/deployer/deployer
+WorkingDirectory=/home/pi/code/deployer/
+
+[Install]
+WantedBy=multi-user.target
