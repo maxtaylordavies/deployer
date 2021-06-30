@@ -6,6 +6,7 @@ User=pi
 Type=simple
 Restart=always
 RestartSec=5s
+ExecStartPre=/bin/sh -c 'go build'
 ExecStart=/home/pi/code/deployer/deployer
 WorkingDirectory=/home/pi/code/deployer/
 
