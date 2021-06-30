@@ -1,24 +1,32 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
 	"time"
 )
 
+type data struct {
+	Repo string `json:"repo"`
+}
+
 func registerRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/deploy", func(w http.ResponseWriter, r *http.Request) {
-		repo := r.URL.Query().Get("repo")
-		if repo == "" {
-			http.Error(w, "repo query param is required", http.StatusBadRequest)
+		decoder := json.NewDecoder(r.Body)
+		var data data
+
+		err := decoder.Decode(&data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", repo))
-		cmd.Dir = "/home/pi/code/" + repo
+		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", data.Repo))
+		cmd.Dir = "/home/pi/code/" + data.Repo
 
 		go cmd.Output()
 		w.WriteHeader(http.StatusOK)
