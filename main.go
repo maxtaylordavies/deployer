@@ -9,7 +9,8 @@ import (
 )
 
 type data struct {
-	Repo string `json:"repo"`
+	Repo               string `json:"repo"`
+	ServiceFileChanged bool   `json:"service_file_changed"`
 }
 
 func registerRoutes() http.Handler {
@@ -25,10 +26,24 @@ func registerRoutes() http.Handler {
 			return
 		}
 
-		cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", data.Repo))
-		cmd.Dir = "/home/pi/code/" + data.Repo
+		// if the service file has been modified, we need to replace it and reload the systemctl daemon
+		var cmd *exec.Cmd
+		if data.ServiceFileChanged {
+			fmt.Println("service file changed, reloading systemctl daemon")
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo cp %s.service /etc/systemd/system/%s.service && sudo systemctl daemon-reload", data.Repo, data.Repo))
+			cmd.Dir = fmt.Sprintf("/home/pi/code/%s", data.Repo)
+			err = cmd.Run()
 
-		go cmd.Output()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+
+		cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", data.Repo))
+		cmd.Dir = fmt.Sprintf("/home/pi/code/%s", data.Repo)
+
+		go cmd.Run()
 		w.WriteHeader(http.StatusOK)
 		// if err != nil {
 		// 	http.Error(w, "output: "+string(out)+", error: "+err.Error(), http.StatusInternalServerError)
