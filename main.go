@@ -30,19 +30,12 @@ func registerRoutes() http.Handler {
 		var cmd *exec.Cmd
 		if data.ServiceFileChanged {
 			fmt.Println("service file changed, reloading systemctl daemon")
-			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo cp %s.service /etc/systemd/system/%s.service && sudo systemctl daemon-reload", data.Repo, data.Repo))
-			cmd.Dir = fmt.Sprintf("/home/pi/code/%s", data.Repo)
-			err = cmd.Run()
-
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo cp %s.service /etc/systemd/system/%s.service && sudo systemctl daemon-reload && sudo systemctl restart %s.service", data.Repo, data.Repo, data.Repo))
+		} else {
+			cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", data.Repo))
 		}
 
-		cmd = exec.Command("/bin/sh", "-c", fmt.Sprintf("git pull && sudo systemctl restart %s.service", data.Repo))
 		cmd.Dir = fmt.Sprintf("/home/pi/code/%s", data.Repo)
-
 		go cmd.Run()
 		w.WriteHeader(http.StatusOK)
 		// if err != nil {
