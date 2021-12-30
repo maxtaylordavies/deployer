@@ -1,0 +1,31 @@
+name: Reusable deploy workflow
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Changed Files
+        id: files
+        uses: jitterbit/get-changed-files@v1
+      - name: Service File Modified
+        id: changed
+        run: |
+          changed=false
+          for cf in ${{ steps.files.outputs.all }}; do
+            if [[ $cf == *.service ]]; then changed=true; fi
+          done
+          echo $changed
+          echo "::set-output name=changed::$changed"
+      - name: Deploy Stage
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: "https://deploy.fun/deploy"
+          method: "POST"
+          data: '{"repo": "${{ inputs.repo }}", "service_file_changed": ${{ steps.changed.outputs.changed }}}'
